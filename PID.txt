@@ -1,0 +1,9 @@
+CSN(SS)     95
+CE          16
+MOSI        4
+SCK         6
+IRQ(INT)    17
+MISO        5
+
+TX          15
+RX          8

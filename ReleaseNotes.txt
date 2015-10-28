@@ -1,0 +1,23 @@
+NvtFly 1.42 Aug-4-2015
+Improvements over 1.4:
+1) Firmware auto select Baro(ms5611/bmp280) on board(T.L. Shen)
+2) Support 100 usec system tick(T.L. Shen)
+3) Simplify the pwm driver for effecency(C.P. Lu)  
+4) Fly attitude stable control(T.L. Shen)
+	a) Update default PID
+	b) Change sensor filter frequency from 188Hz to 42Hz
+5) Support brushed DC motor
+6) Add firmware version information
+7) Add Board version
+8) Support HEX6X frame
+
+Bug Fixes / Parameter changes:
+- fix perpeller auto spin in a few minutes when user turn off remote controller and copter is under dis-arm state(T.L. Shen)
+- fix MAG calbration QC error(T.L. Shen)
+- fix brushed DC motor spin when pwm init 
+------------------------------------------------------------------
+NvtFly 1.42 Aug-4-2015
+Improvements over 1.5:
+Bug Fixes / Parameter changes:
+1) Fix battery become 0 but report battery full(T.L. Shen)
+2) Fix headfree mode error 
