@@ -38,13 +38,28 @@
 #define ESC_UPDATE_FREQ            400
 #define ESC_FREQ_UPDATE_FREQ_DIV_1000000  0.0004f
 #define MOTORS_ESC_DELAY           1500 /*Frame*/
+#ifdef ABROBOT
+#define MOTOR_NUMBER               6
+#define STOP  0
+#define CCW   1
+#define CW    2
+#define BREAK 3
+#define R     0
+#define L     1
+typedef struct {
+  uint8_t ctrl;
+  uint16_t pwm;
+} BLDC_MOTOR_T;
+#else
 #ifdef HEX6X 
 #define MOTOR_NUMBER               6
 #else
 #define MOTOR_NUMBER               4
 #endif
+#endif
 #define MAX_PULSE_WIDTH            2000 /*pulse width range from 0 to 2000 and 2000 means 2ms*/
 #define PWM_GET_CNR(pwm, u32ChannelNum)  (*(__IO uint32_t *) (&((pwm)->PERIOD0) + (u32ChannelNum)))
+
 
 void motorsInit(void);
 void motorsSetRatio(int id, uint16_t ratio);

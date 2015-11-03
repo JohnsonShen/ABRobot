@@ -205,7 +205,7 @@ bool CheckNearLand()
 	}
 }
 
-void stabilizerAltHoldUpdate(uint16_t *actuatorThrust)
+void stabilizerAltHoldUpdate(int16_t *actuatorThrust)
 {
 	float vSpeed;	
 

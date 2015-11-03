@@ -129,7 +129,7 @@ void report_sensor_calibrated()
 }
 void report_motor_power()
 {
-	uint16_t MotorPower[MOTOR_NUMBER];
+	int16_t MotorPower[MOTOR_NUMBER];
 	GetMotorPower(MotorPower);
 	
 	if (report_format == REPORT_FORMAT_BINARY) {

@@ -18,7 +18,7 @@
 #include <stdint.h>
 void stabilizer(void);
 void stabilizerInit(void);
-void GetMotorPower(uint16_t* MotorPower);
+void GetMotorPower(int16_t* MotorPower);
 char GetFlip(void);
 void ClearFlip(void);
 float GetAccWZ(void);

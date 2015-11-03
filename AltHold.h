@@ -23,7 +23,7 @@ typedef struct ALT_STATE {
 	float asl;
 }ALTHOLD_STATE_T;
 bool GetAltHoldMode(void);
-void stabilizerAltHoldUpdate(uint16_t *);
+void stabilizerAltHoldUpdate(int16_t *);
 bool GetAltHoldMode(void);
 void SetAltHoldPIDObj(PidObject* PIDObj);
 void SetCalibratingB(uint8_t c);

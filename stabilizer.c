@@ -30,6 +30,9 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| {======|             *
 #define THRUST_MAX    90
 #define COS_30        0.866f
 #define COS_60        0.5f
+#ifdef ABROBOT
+#define ACTUATOR_DEAD_ZONE 5
+#endif
 static float gyro[3]; // Gyro axis data in deg/s
 static float eulerRollActual;
 static float eulerPitchActual;
@@ -47,12 +50,15 @@ static float headFreeHold = 0.0f;
 static bool magMode = false;
 static bool headFreeMode = false;
 
-uint16_t actuatorThrust;
+int16_t actuatorThrust;
 int16_t  actuatorRoll;
 int16_t  actuatorPitch;
 int16_t  actuatorYaw;
 
 uint32_t motorPowerM[MOTOR_NUMBER];
+#ifdef ABROBOT
+BLDC_MOTOR_T BLDC_MOTOR[MOTOR_NUMBER];
+#endif
 
 char flip = 0;
 void HoldHead(void)
@@ -182,10 +188,15 @@ void commanderGetRPY()
 void commanderGetThrust()
 {
 	int16_t rcData[RC_CHANS], rc_thrust;
+#ifndef ABROBOT
 	char arm_min_thr = RC_THR_ARM - RC_THR_MIN;
+#endif
 	
 	getRC(rcData);
 	rc_thrust = GetRCThrust();
+#ifdef ABROBOT
+  actuatorThrust = rc_thrust - RC_THR_MID;
+#else
 	if(checkArm()) {
 		if(rc_thrust<arm_min_thr) {
 #if STACK_BARO
@@ -208,6 +219,7 @@ void commanderGetThrust()
 		actuatorThrust = 0;
 	else
 		actuatorThrust = rc_thrust;
+#endif
 }
 bool isArmMinThrottle()
 {
@@ -233,9 +245,46 @@ uint16_t limitThrust(int32_t value)
 	return (uint16_t)value;
 }
 
-static void distributePower(uint16_t thrust, int16_t roll,
+static void distributePower(int16_t thrust, int16_t roll,
                             int16_t pitch, int16_t yaw)
 {
+#ifdef ABROBOT
+  int16_t actuator;
+  actuator = thrust - pitch;
+  /* ROBOT tilt forward
+     Right Motor CCW and Left Motor CW for balance
+  */
+  if(actuator>ACTUATOR_DEAD_ZONE) { 
+    BLDC_MOTOR[L].ctrl = CW;
+    BLDC_MOTOR[L].pwm = actuator;
+    motorPowerM[L] = BLDC_MOTOR[L].pwm;
+    BLDC_MOTOR[R].ctrl = CCW;
+    BLDC_MOTOR[R].pwm = actuator;
+    motorPowerM[R] = BLDC_MOTOR[R].pwm;
+  } 
+  /* ROBOT tilt backward
+     Right Motor CW and Left Motor CCW for balance
+  */
+  else  if(actuator<-ACTUATOR_DEAD_ZONE) { 
+    actuator = -actuator;
+    BLDC_MOTOR[L].ctrl = CCW;
+    BLDC_MOTOR[L].pwm = actuator;
+    motorPowerM[L] = -BLDC_MOTOR[L].pwm;
+    BLDC_MOTOR[R].ctrl = CW;
+    BLDC_MOTOR[R].pwm = actuator;
+    motorPowerM[R] = -BLDC_MOTOR[R].pwm;
+  } 
+  /* Balance in Dead Zone */
+  else {
+    BLDC_MOTOR[L].ctrl = STOP;
+    BLDC_MOTOR[L].pwm = 0;
+    motorPowerM[L] = 0;
+    BLDC_MOTOR[R].pwm = 0;
+    motorPowerM[R] = 0;
+  }
+  motorsSetRatio(MOTOR_M1, BLDC_MOTOR[R].pwm);
+	motorsSetRatio(MOTOR_M2, BLDC_MOTOR[L].pwm);
+#else
 #ifdef HEX6X 
 	motorPowerM[0] = limitThrust(thrust - COS_60*roll - COS_30*pitch + yaw);//PIDMIX(-1/2,-7/8,+1); //FRONT_R
 	motorPowerM[1] = limitThrust(thrust - roll - yaw);//PIDMIX(-1  ,+0  ,-1); //RIGHT
@@ -275,9 +324,10 @@ static void distributePower(uint16_t thrust, int16_t roll,
 	motorsSetRatio(MOTOR_M5, motorPowerM[4]);
 	motorsSetRatio(MOTOR_M6, motorPowerM[5]);
 #endif
+#endif
 }
 
-void GetMotorPower(uint16_t* MotorPower)
+void GetMotorPower(int16_t* MotorPower)
 {
 	MotorPower[0] = (uint16_t)motorPowerM[0];
 	MotorPower[1] = (uint16_t)motorPowerM[1];
@@ -370,12 +420,20 @@ void stabilizer()
 #ifdef DGB	
 	printf("actuatorThrust:%d",actuatorThrust);
 #endif
-	if(GetFrameCount()>(MOTORS_ESC_DELAY*2)) {
-	if (actuatorThrust > 0)
-			distributePower(actuatorThrust, actuatorRoll, actuatorPitch, -actuatorYaw);
-	else {
-		distributePower(0, 0, 0, 0);
-	}
-		//printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  ",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);
-}
+#ifdef ABROBOT
+  //if ((actuatorThrust>ACTUATOR_DEAD_ZONE)||(actuatorThrust<-ACTUATOR_DEAD_ZONE))
+    distributePower(actuatorThrust, actuatorRoll, actuatorPitch, -actuatorYaw);
+ // else
+ //   distributePower(0, 0, 0, 0);
+    //printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);
+#else
+  if(GetFrameCount()>(MOTORS_ESC_DELAY*2)) {
+    if (actuatorThrust > 0)
+        distributePower(actuatorThrust, actuatorRoll, actuatorPitch, -actuatorYaw);
+    else {
+      distributePower(0, 0, 0, 0);
+    }
+    //printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  ",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);
+  }
+#endif
 }

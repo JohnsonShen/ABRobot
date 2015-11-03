@@ -35,7 +35,11 @@
 #define RC_YAW_MAX       1920
 #define RC_THR_MIN       1090
 #define RC_THR_ARM       1100
+#ifdef ABROBOT
+#define RC_THR_MID       250
+#else
 #define RC_THR_MID       1500
+#endif
 #define RC_THR_MAX       1920
 #define RC_THR_HOV       1355
 #define RC_ALT_MIN       1090
