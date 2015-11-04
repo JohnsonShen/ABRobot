@@ -122,6 +122,11 @@ void commanderGetRPY()
 	rc_pitch = (rcData[PITCH_CH] - RC_PITCH_MID);
 	rc_yaw = (rcData[YAW_CH] - RC_YAW_MID);
 	rc_aux2 = rcData[AUX2_CH];
+  
+#ifdef ABROBOT
+  rc_pitch = -rc_pitch;
+  rc_roll = -rc_roll;
+#endif
 	
 	if(rc_aux2<RC_ONE_THIRD) {
 		magMode = false;
@@ -249,38 +254,54 @@ static void distributePower(int16_t thrust, int16_t roll,
                             int16_t pitch, int16_t yaw)
 {
 #ifdef ABROBOT
-  int16_t actuator;
-  actuator = thrust - pitch;
+  int16_t actuator[2];
+  actuator[R] = thrust - pitch + roll;
+  actuator[L] = -thrust + pitch + roll;
   /* ROBOT tilt forward
-     Right Motor CCW and Left Motor CW for balance
+     Right Motor CCW for balance
   */
-  if(actuator>ACTUATOR_DEAD_ZONE) { 
-    BLDC_MOTOR[L].ctrl = CW;
-    BLDC_MOTOR[L].pwm = actuator;
-    motorPowerM[L] = BLDC_MOTOR[L].pwm;
-    BLDC_MOTOR[R].ctrl = CCW;
-    BLDC_MOTOR[R].pwm = actuator;
+  if(actuator[R]>ACTUATOR_DEAD_ZONE) { 
+    BLDC_MOTOR[R].ctrl = CW;
+    BLDC_MOTOR[R].pwm = actuator[R];
     motorPowerM[R] = BLDC_MOTOR[R].pwm;
   } 
   /* ROBOT tilt backward
-     Right Motor CW and Left Motor CCW for balance
+     Right Motor CW for balance
   */
-  else  if(actuator<-ACTUATOR_DEAD_ZONE) { 
-    actuator = -actuator;
-    BLDC_MOTOR[L].ctrl = CCW;
-    BLDC_MOTOR[L].pwm = actuator;
-    motorPowerM[L] = -BLDC_MOTOR[L].pwm;
-    BLDC_MOTOR[R].ctrl = CW;
-    BLDC_MOTOR[R].pwm = actuator;
+  else if(actuator[R]<-ACTUATOR_DEAD_ZONE) { 
+    actuator[R] = -actuator[R];
+    BLDC_MOTOR[R].ctrl = CCW;
+    BLDC_MOTOR[R].pwm = actuator[R];
     motorPowerM[R] = -BLDC_MOTOR[R].pwm;
+  } 
+  /* Balance in Dead Zone */
+  else {
+    BLDC_MOTOR[R].ctrl = STOP;
+    BLDC_MOTOR[R].pwm = 0;
+    motorPowerM[R] = 0;
+  }
+   /* ROBOT tilt forward
+     Left Motor CW for balance
+  */
+  if(actuator[L]>ACTUATOR_DEAD_ZONE) { 
+    BLDC_MOTOR[L].ctrl = CW;
+    BLDC_MOTOR[L].pwm = actuator[L];
+    motorPowerM[L] = BLDC_MOTOR[L].pwm;
+  } 
+  /* ROBOT tilt backward
+     Left Motor CCW for balance
+  */
+  else if(actuator[L]<-ACTUATOR_DEAD_ZONE) { 
+    actuator[L] = -actuator[L];
+    BLDC_MOTOR[L].ctrl = CCW;
+    BLDC_MOTOR[L].pwm = actuator[L];
+    motorPowerM[L] = -BLDC_MOTOR[L].pwm;
   } 
   /* Balance in Dead Zone */
   else {
     BLDC_MOTOR[L].ctrl = STOP;
     BLDC_MOTOR[L].pwm = 0;
     motorPowerM[L] = 0;
-    BLDC_MOTOR[R].pwm = 0;
-    motorPowerM[R] = 0;
   }
   motorsSetRatio(MOTOR_M1, BLDC_MOTOR[R].pwm);
 	motorsSetRatio(MOTOR_M2, BLDC_MOTOR[L].pwm);
@@ -425,7 +446,8 @@ void stabilizer()
     distributePower(actuatorThrust, actuatorRoll, actuatorPitch, -actuatorYaw);
  // else
  //   distributePower(0, 0, 0, 0);
-    //printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);
+  //if((GetFrameCount()%18)==0)
+  //  printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);
 #else
   if(GetFrameCount()>(MOTORS_ESC_DELAY*2)) {
     if (actuatorThrust > 0)
