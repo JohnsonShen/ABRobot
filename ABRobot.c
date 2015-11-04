@@ -137,6 +137,9 @@ void setup()
 	TIMER_Init();
 	stabilizerInit();
 #endif
+#ifdef ABROBOT
+  ABRobotMotorInit();
+#endif
 	nvtAHRSInit();
 	SensorsInit();
 	ChronographSet(ChronMain);

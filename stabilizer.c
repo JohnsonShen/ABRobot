@@ -13,6 +13,8 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| {======|             *
  *                                                                            *
  *============================================================================*
  */
+#include "M451Series.h"
+#include "gpio.h"
 #include "Def.h"
 #include "RC.h"
 #include "AHRSLib.h"
@@ -303,6 +305,44 @@ static void distributePower(int16_t thrust, int16_t roll,
     BLDC_MOTOR[L].pwm = 0;
     motorPowerM[L] = 0;
   }
+  switch(BLDC_MOTOR[R].ctrl)
+  {
+    case STOP:
+      PE12 = 0;
+      PE13 = 0;
+    break;
+    case CCW:
+      PE12 = 0;
+      PE13 = 1;
+    break;
+  case CW:
+      PE12 = 1;
+      PE13 = 0;
+    break;
+  default:
+    PE12 = 1;
+    PE13 = 1;
+  }
+  
+  switch(BLDC_MOTOR[L].ctrl)
+  {
+    case STOP:
+      PD7 = 0;
+      PF2 = 0;
+    break;
+    case CCW:
+      PD7 = 0;
+      PF2 = 1;
+    break;
+    case CW:
+      PD7 = 1;
+      PF2 = 0;
+    break;
+    default:
+      PD7 = 1;
+      PF2 = 1;
+  }
+    
   motorsSetRatio(MOTOR_M1, BLDC_MOTOR[R].pwm);
 	motorsSetRatio(MOTOR_M2, BLDC_MOTOR[L].pwm);
 #else

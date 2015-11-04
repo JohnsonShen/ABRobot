@@ -23,7 +23,12 @@
 #define MOTORS_PWM_BITS     9
 #define MOTORS_PWM_PERIOD   ((1<<MOTORS_PWM_BITS) - 1)
 #define MOTORS_PWM_PRESCALE 0
-
+#ifdef ABROBOT
+#define IO_MR_CRTL0        PE,BIT12
+#define IO_MR_CRTL1        PE,BIT13
+#define IO_ML_CRTL0        PD,BIT7
+#define IO_ML_CRTL1        PF,BIT2
+#endif
 // Motors IDs define
 #define MOTOR_M1  0
 #define MOTOR_M2  1
@@ -65,5 +70,8 @@ void motorsInit(void);
 void motorsSetRatio(int id, uint16_t ratio);
 int motorsGetRatio(int id);
 void motorsStart(void);
+#ifdef ABROBOT
+void ABRobotMotorInit(void);
+#endif
 #endif /* __MOTORS_H__ */
 

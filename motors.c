@@ -251,4 +251,14 @@ void motorsSetRatio(int id, uint16_t u16PulseWidth)
 	sPt.u8HighPulseRatio = ratio;
 	DrvPWM_SetTimerClk(u8Timer, &sPt);
 #endif
+} 
+#ifdef ABROBOT
+void ABRobotMotorInit()
+{
+  GPIO_SetMode(IO_MR_CRTL0,GPIO_MODE_OUTPUT);
+  GPIO_SetMode(IO_MR_CRTL1,GPIO_MODE_OUTPUT);
+  GPIO_SetMode(IO_ML_CRTL0,GPIO_MODE_OUTPUT);
+  GPIO_SetMode(IO_ML_CRTL1,GPIO_MODE_OUTPUT);
+
 }
+#endif
