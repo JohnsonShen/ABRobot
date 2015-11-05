@@ -238,6 +238,7 @@ void SensorInitMAG()
 }
 void SensorInitBARO()
 {
+#if STACK_BARO
 #ifdef BMP085
 		SensorInitState.BARO_Done = begin(BMP085_ULTRAHIGHRES);
 	if(SensorInitState.BARO_Done)
@@ -288,6 +289,7 @@ void SensorInitBARO()
 	}
 	else
 		printf("BARO connect - [FAIL]\n");
+#endif
 }
 void SensorsInit()
 {

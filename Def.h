@@ -33,7 +33,7 @@
 #define bool unsigned char
 #endif
 
-#if ((BOARD_CODE == 140)||(BOARD_CODE == 145))
+#if (BOARD_CODE == 140)
 #define USE_I2C_PORT1
 /************************/
 /*      ACC/GYRO        */
@@ -50,6 +50,17 @@
 //#define BMP085 0
 #define MS5611 1
 #define BMP280 2
+#endif
+#if (BOARD_CODE == 145)
+#define USE_I2C_PORT1
+/************************/
+/*      ACC/GYRO        */
+/************************/
+#define MPU6050
+/************************/
+/*        MAG           */
+/************************/
+#define HMC5883
 #endif
 #if (BOARD_CODE == 150)
 #define USE_I2C_PORT0

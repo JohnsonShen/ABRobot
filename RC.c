@@ -159,7 +159,9 @@ void armDetect()
 					led_arm_state(LED_STATE_ON);
 				}
 		}else if(rcData[THR_CH]<RC_MIN_CHECK) {
+#if STACK_BARO
 			if(!GetAutoLandMode())
+#endif
 				idle_count++;
 			if(rcData[YAW_CH]<RC_ARM_MIN_CHECK) {
 				arm_count++;

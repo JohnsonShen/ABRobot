@@ -129,12 +129,13 @@ void ssv_rc_update(void)
 		RxChannel[YAW_CH] 	= ((RxData.BUF[3]<<2)| RxData.BUF[4]&3);
 		RxChannel[AUX1_CH] 	= ((RxData.BUF[5]<<2)|(RxData.BUF[7]>>2)&3);
 		RxChannel[AUX2_CH] 	= ((RxData.BUF[6]<<2)| RxData.BUF[7]&3);
-
+#ifndef ABROBOT
 		if(RxChannel[THR_CH]<CHANNEL_LOW_GAP)
 			rcValueSSV[THR_CH] = THR_BASE;
 		else
+#else
 			rcValueSSV[THR_CH] = RxChannel[THR_CH]*THR_SCALE + THR_LOW;
-		
+#endif
 		rcValueSSV[ROLL_CH] = RxChannel[ROLL_CH]*ROLL_SCALE + ROLL_BASE;
 		rcValueSSV[PITCH_CH] = RxChannel[PITCH_CH]*PITCH_SCALE + PITCH_BASE;
 		rcValueSSV[YAW_CH] = RxChannel[YAW_CH]*YAW_SCALE + YAW_BASE;
