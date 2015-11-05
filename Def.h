@@ -33,7 +33,7 @@
 #define bool unsigned char
 #endif
 
-#if (BOARD_CODE == 140)
+#if ((BOARD_CODE == 140)||(BOARD_CODE == 145))
 #define USE_I2C_PORT1
 /************************/
 /*      ACC/GYRO        */
