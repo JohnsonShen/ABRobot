@@ -30,6 +30,14 @@
 
 #include <stdbool.h>
 #include "Def.h"
+#ifdef ABROBOT
+#define RATE_KP_DC 8.55f
+#define RATE_KI_DC 0.1f
+#define RATE_KD_DC 1.0f
+#define LEVEL_KP_DC 14.3f
+#define LEVEL_KI_DC 1.1f
+#define LEVEL_KD_DC 0
+#endif
 #ifdef HEX6X
 #ifdef H630
 #define RATE_KP_1806 4
@@ -67,15 +75,25 @@
 #define LEVEL_KP_2206 4
 #define LEVEL_KI_2206 2
 #define LEVEL_KD_2206 0
-
+#ifdef ABROBOT
+#define PID_ROLL_RATE_KP  RATE_KP_DC
+#define PID_ROLL_RATE_KI  RATE_KI_DC
+#define PID_ROLL_RATE_KD  RATE_KD_DC
+#else
 #define PID_ROLL_RATE_KP  RATE_KP_1806
 #define PID_ROLL_RATE_KI  RATE_KI_1806
 #define PID_ROLL_RATE_KD  RATE_KD_1806
+#endif
 #define PID_ROLL_RATE_INTEGRATION_LIMIT    100.0
-
+#ifdef ABROBOT
+#define PID_PITCH_RATE_KP  RATE_KP_DC
+#define PID_PITCH_RATE_KI  RATE_KI_DC
+#define PID_PITCH_RATE_KD  RATE_KD_DC
+#else
 #define PID_PITCH_RATE_KP  RATE_KP_1806
 #define PID_PITCH_RATE_KI  RATE_KI_1806
 #define PID_PITCH_RATE_KD  RATE_KD_1806
+#endif
 #define PID_PITCH_RATE_INTEGRATION_LIMIT   100.0
 #ifdef H630
 #define PID_YAW_RATE_KP  2/*20.5*/
@@ -87,14 +105,25 @@
 #define PID_YAW_RATE_KD  0.0
 #endif
 #define PID_YAW_RATE_INTEGRATION_LIMIT     500.0
+#ifdef ABROBOT
+#define PID_ROLL_KP  LEVEL_KP_DC
+#define PID_ROLL_KI  LEVEL_KI_DC
+#define PID_ROLL_KD  LEVEL_KD_DC
+#else
 #define PID_ROLL_KP  LEVEL_KP_1806
 #define PID_ROLL_KI  LEVEL_KI_1806
 #define PID_ROLL_KD  LEVEL_KD_1806
+#endif
 #define PID_ROLL_INTEGRATION_LIMIT    20.0
-
+#ifdef ABROBOT
+#define PID_PITCH_KP  LEVEL_KP_DC
+#define PID_PITCH_KI  LEVEL_KI_DC
+#define PID_PITCH_KD  LEVEL_KD_DC
+#else
 #define PID_PITCH_KP  LEVEL_KP_1806
 #define PID_PITCH_KI  LEVEL_KI_1806
 #define PID_PITCH_KD  LEVEL_KD_1806
+#endif
 #define PID_PITCH_INTEGRATION_LIMIT   20.0
 
 #define PID_YAW_KP  0.0

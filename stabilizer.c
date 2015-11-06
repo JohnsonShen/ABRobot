@@ -392,11 +392,16 @@ void GetMotorPower(int16_t* MotorPower)
 {
 	MotorPower[0] = (uint16_t)motorPowerM[0];
 	MotorPower[1] = (uint16_t)motorPowerM[1];
+#ifdef ABROBOT
+  MotorPower[2] = BLDC_MOTOR[R].ctrl;
+  MotorPower[3] = BLDC_MOTOR[L].ctrl;
+#else
 	MotorPower[2] = (uint16_t)motorPowerM[2];
 	MotorPower[3] = (uint16_t)motorPowerM[3];
 #ifdef HEX6X 
 	MotorPower[4] = (uint16_t)motorPowerM[4];
 	MotorPower[5] = (uint16_t)motorPowerM[5];
+#endif
 #endif
 }
 bool IsMotorSpin() 
@@ -440,7 +445,13 @@ void stabilizer()
 	bool altHold =  GetAltHoldMode();
 #endif	
 	nvtGetEulerRPY(Euler);
+#ifdef ABROBOT
+  eulerRollActual = 0;
+  eulerYawActual = 0;
+#else
 	eulerRollActual = Euler[0];
+  eulerYawActual = Euler[2];
+#endif
 	eulerPitchActual = Euler[1];
 	eulerYawActual = Euler[2];
 
@@ -482,10 +493,10 @@ void stabilizer()
 	printf("actuatorThrust:%d",actuatorThrust);
 #endif
 #ifdef ABROBOT
-  //if ((actuatorThrust>ACTUATOR_DEAD_ZONE)||(actuatorThrust<-ACTUATOR_DEAD_ZONE))
+  if((GetSensorCalState()&(1<<GYRO))) 
     distributePower(actuatorThrust, actuatorRoll, actuatorPitch, -actuatorYaw);
- // else
- //   distributePower(0, 0, 0, 0);
+  else
+    distributePower(0, 0, 0, 0);
   //if((GetFrameCount()%18)==0)
   //  printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);
 #else
