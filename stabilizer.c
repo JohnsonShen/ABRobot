@@ -33,7 +33,7 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| {======|             *
 #define COS_30        0.866f
 #define COS_60        0.5f
 #ifdef ABROBOT
-#define ACTUATOR_DEAD_ZONE 5
+#define ACTUATOR_DEAD_ZONE 20
 #endif
 static float gyro[3]; // Gyro axis data in deg/s
 static float eulerRollActual;

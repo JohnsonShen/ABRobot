@@ -34,8 +34,8 @@
 #define RATE_KP_DC 8.55f
 #define RATE_KI_DC 0.1f
 #define RATE_KD_DC 1.0f
-#define LEVEL_KP_DC 14.3f
-#define LEVEL_KI_DC 1.1f
+#define LEVEL_KP_DC 50.0f
+#define LEVEL_KI_DC 10.0f
 #define LEVEL_KD_DC 0
 #endif
 #ifdef HEX6X
