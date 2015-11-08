@@ -89,7 +89,8 @@ void controllerInit()
 		printf("Load PID from [DEFAULT]\n");
 	else
 		printf("Load PID from [FLASH]\n");
-
+#ifdef ABROBOT
+	/* TBD for ABROBOT proper LIMIT */
 	pidSetIntegralLimit(&pidRollRate, PID_ROLL_RATE_INTEGRATION_LIMIT);
 	pidSetIntegralLimit(&pidPitchRate, PID_PITCH_RATE_INTEGRATION_LIMIT);
 	pidSetIntegralLimit(&pidYawRate, PID_YAW_RATE_INTEGRATION_LIMIT);
@@ -105,7 +106,23 @@ void controllerInit()
 	pidSetIntegralLimitLow(&pidRoll, -PID_ROLL_INTEGRATION_LIMIT);
 	pidSetIntegralLimitLow(&pidPitch, -PID_PITCH_INTEGRATION_LIMIT);
 	pidSetIntegralLimitLow(&pidYaw, -PID_YAW_INTEGRATION_LIMIT);
+#else
+	pidSetIntegralLimit(&pidRollRate, PID_ROLL_RATE_INTEGRATION_LIMIT);
+	pidSetIntegralLimit(&pidPitchRate, PID_PITCH_RATE_INTEGRATION_LIMIT);
+	pidSetIntegralLimit(&pidYawRate, PID_YAW_RATE_INTEGRATION_LIMIT);
 
+	pidSetIntegralLimitLow(&pidRollRate, -PID_ROLL_RATE_INTEGRATION_LIMIT);
+	pidSetIntegralLimitLow(&pidPitchRate, -PID_PITCH_RATE_INTEGRATION_LIMIT);
+	pidSetIntegralLimitLow(&pidYawRate, -PID_YAW_RATE_INTEGRATION_LIMIT);
+
+	pidSetIntegralLimit(&pidRoll, PID_ROLL_INTEGRATION_LIMIT);
+	pidSetIntegralLimit(&pidPitch, PID_PITCH_INTEGRATION_LIMIT);
+	pidSetIntegralLimit(&pidYaw, PID_YAW_INTEGRATION_LIMIT);
+  
+	pidSetIntegralLimitLow(&pidRoll, -PID_ROLL_INTEGRATION_LIMIT);
+	pidSetIntegralLimitLow(&pidPitch, -PID_PITCH_INTEGRATION_LIMIT);
+	pidSetIntegralLimitLow(&pidYaw, -PID_YAW_INTEGRATION_LIMIT);
+#endif
 	isInit = true;
 }
 

@@ -25,9 +25,13 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| {======|             *
 #include "sensors.h"
 #include "AltHold.h"
 #include "Timer_Ctrl.h"
-
+#ifdef ABROBOT
+#define ROLL_DEG_MAX  10
+#define PITCH_DEG_MAX 60
+#else
 #define ROLL_DEG_MAX  60
 #define PITCH_DEG_MAX 60
+#endif
 #define YAW_DEG_MAX   80
 #define THRUST_MAX    90
 #define COS_30        0.866f
@@ -126,7 +130,7 @@ void commanderGetRPY()
 	rc_aux2 = rcData[AUX2_CH];
   
 #ifdef ABROBOT
-  rc_pitch = -rc_pitch;
+  //rc_pitch = -rc_pitch;
   rc_roll = -rc_roll;
 #endif
 	

@@ -87,9 +87,13 @@ void SysTick_Handler(void)
 #endif
 	if((tick_counter_100u%SYSTEM_TICK_FREQ)==0) {
 		freqCount=frame_counter-FC_Last;
+#ifdef ABROBOT
+		UPDATE_DT = 0.002f;
+#else
 		UPDATE_DT = (float)(1.0f/freqCount);
+#endif
 #if DISPLAY_LOOP_TIME
-		printf("FC:%d\n",freqCount);
+		printf("FC:%d, UPDATE_DT:%f\n",freqCount,UPDATE_DT);
 #endif
 		FC_Last = frame_counter;
 #ifndef PWM_RC
