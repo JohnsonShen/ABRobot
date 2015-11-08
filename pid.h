@@ -31,11 +31,11 @@
 #include <stdbool.h>
 #include "Def.h"
 #ifdef ABROBOT
-#define RATE_KP_DC 8.55f
+#define RATE_KP_DC 5.8f
 #define RATE_KI_DC 0.1f
 #define RATE_KD_DC 1.0f
-#define LEVEL_KP_DC 50.0f
-#define LEVEL_KI_DC 10.0f
+#define LEVEL_KP_DC 39.8f
+#define LEVEL_KI_DC 5.6f
 #define LEVEL_KD_DC 0
 #endif
 #ifdef HEX6X
