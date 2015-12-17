@@ -11,16 +11,16 @@
 * GNU General Public License for more details.
 */
 /*============================================================================*
- * O     O          __                   ______  __                           *
- *  \   /      /\  / /_      _    __    / /___/ / /_     _                    *
- *   [+]      /  \/ / \\    //__ / /__ / /____ / / \\   //                    *
- *  /   \    / /\  /   \\__// --/ /---/ /----// /   \\_//                     *
- * O     O  /_/  \/     \__/    \_\/ /_/     /_/ ____/_/                      *
+  ___     ___     ___            _                _                           *
+  /   \   | _ )   | _ \    ___   | |__     ___    | |_      o O O             *
+  | - |   | _ \   |   /   / _ \  | '_ \   / _ \   |  _|    o                  *
+  |_|_|   |___/   |_|_\   \___/  |_.__/   \___/   _\__|   TS__[O]             *
+_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| {======|             *
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'./o--000'             *
  *                                                                            *
+ * Auto Balance Robot controller firmware for Nuvoton Cortex M4 series        *
  *                                                                            *
- * Multi-Rotor controller firmware for Nuvoton Cortex M4 series               *
- *                                                                            *
- * Written by by T.L. Shen for Nuvoton Technology.                            *
+ * Written by T.L. Shen for Nuvoton Technology.                               *
  * tlshen@nuvoton.com/tzulan611126@gmail.com                                  *
  *                                                                            *
  *============================================================================*
@@ -135,6 +135,14 @@
 #define ALTHOLD_KD_BMP280 950
 #define PID_ALTHOLD_KP  ALTHOLD_KP_BMP280/*36.9//13*/
 #define PID_ALTHOLD_KI  ALTHOLD_KI_BMP280/*0.5*/
+#ifdef ABROBOT
+#define SPEED_KP_HALL 1
+#define SPEED_KI_HALL 1
+#define SPEED_KD_HALL 1
+#define PID_SPEED_KP SPEED_KP_HALL
+#define PID_SPEED_KI SPEED_KI_HALL
+#define PID_SPEED_KD SPEED_KD_HALL
+#endif
 #ifdef LOW_WEIGHT//850mah
 #define PID_ALTHOLD_KD  23//30.1
 #else //1600mah

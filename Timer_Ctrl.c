@@ -77,8 +77,10 @@ void setup_system_tick(uint32_t sampleRate)
 }
 void SysTick_Handler(void)
 {
+#if DISPLAY_LOOP_TIME
 	static int FC_Last;
 	int freqCount=0;
+#endif
 #ifndef PWM_RC
 #if DISPLAY_SSV_TIME
 	static int SSV_Last;
@@ -86,7 +88,9 @@ void SysTick_Handler(void)
 #endif
 #endif
 	if((tick_counter_100u%SYSTEM_TICK_FREQ)==0) {
+#if DISPLAY_LOOP_TIME
 		freqCount=frame_counter-FC_Last;
+#endif
 #ifdef ABROBOT
 		UPDATE_DT = 0.002f;
 #else
@@ -94,8 +98,9 @@ void SysTick_Handler(void)
 #endif
 #if DISPLAY_LOOP_TIME
 		printf("FC:%d, UPDATE_DT:%f\n",freqCount,UPDATE_DT);
+    FC_Last = frame_counter;
 #endif
-		FC_Last = frame_counter;
+		
 #ifndef PWM_RC
 #if DISPLAY_SSV_TIME
 		ssvCount = GetSSV_TickCount() - SSV_Last;

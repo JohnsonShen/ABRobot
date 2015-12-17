@@ -27,7 +27,7 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| {======|             *
 #include "Timer_Ctrl.h"
 #ifdef ABROBOT
 #define ROLL_DEG_MAX  10
-#define PITCH_DEG_MAX 60
+#define PITCH_DEG_MAX 30
 #else
 #define ROLL_DEG_MAX  60
 #define PITCH_DEG_MAX 60
@@ -49,6 +49,9 @@ static float eulerYawDesired;
 static float rollRateDesired;
 static float pitchRateDesired;
 static float yawRateDesired;
+#ifdef ABROBOT
+static float speedDesired;
+#endif
 static float vSpeed       = 0.0f; // Vertical speed (world frame) integrated from vertical acceleration
 static float accWZ        = 0.0f;
 static float headHold     = 0.0f;
@@ -60,6 +63,9 @@ int16_t actuatorThrust;
 int16_t  actuatorRoll;
 int16_t  actuatorPitch;
 int16_t  actuatorYaw;
+#ifdef ABROBOT
+int16_t  actuatorSpeed;
+#endif
 
 uint32_t motorPowerM[MOTOR_NUMBER];
 #ifdef ABROBOT
@@ -186,15 +192,19 @@ void commanderGetRPY()
 			eulerYawDesired = -(rc_yaw*YAW_DEG_MAX/(RC_YAW_MIN-RC_YAW_MID));
 	}
 
-	if(rc_roll>0)
+	if(rc_roll>RC_ROLL_DEAD_BAND)
 		eulerRollDesired = (rc_roll*ROLL_DEG_MAX/(RC_ROLL_MAX-RC_ROLL_MID));
-	else
+	else if(rc_roll<-RC_ROLL_DEAD_BAND)
 		eulerRollDesired = -(rc_roll*ROLL_DEG_MAX/(RC_ROLL_MIN-RC_ROLL_MID));
+  else
+    eulerRollDesired = 0;
 	
-	if(rc_pitch>0)
+	if(rc_pitch>RC_PITCH_DEAD_BAND)
 		eulerPitchDesired = (rc_pitch*PITCH_DEG_MAX/(RC_PITCH_MAX-RC_PITCH_MID));
-	else
+	else if(rc_pitch<-RC_PITCH_DEAD_BAND)
 		eulerPitchDesired = -(rc_pitch*PITCH_DEG_MAX/(RC_PITCH_MIN-RC_PITCH_MID));
+  else
+    eulerPitchDesired = 0;
 }
 void commanderGetThrust()
 {
@@ -207,6 +217,7 @@ void commanderGetThrust()
 	rc_thrust = GetRCThrust();
 #ifdef ABROBOT
   actuatorThrust = rc_thrust - RC_THR_MID;
+  speedDesired = actuatorThrust/10;
 #else
 	if(checkArm()) {
 		if(rc_thrust<arm_min_thr) {
@@ -445,6 +456,12 @@ float deadband(float value, const float threshold)
 void stabilizer()
 {
 	float Euler[3],Ve[3];
+#ifdef ABROBOT
+#ifdef STACK_HALL
+  int16_t moveSpeed;/*cm/sec*/
+#endif
+  moveSpeed = GetMoveSpeed();
+#endif
 #if STACK_BARO	
 	bool altHold =  GetAltHoldMode();
 #endif	
@@ -475,6 +492,8 @@ void stabilizer()
 	controllerCorrectAttitudePID(eulerRollActual, eulerPitchActual, eulerYawActual,
 				eulerRollDesired, eulerPitchDesired, -eulerYawDesired,\
 				&rollRateDesired, &pitchRateDesired, &yawRateDesired);
+  
+
 	
 #if STACK_BARO
 	if(GetSensorInitState()&SENSOR_BARO) {
@@ -492,7 +511,13 @@ void stabilizer()
 	nvtGetCalibratedGYRO(gyro);
 	controllerCorrectRatePID(gyro[0], gyro[1], gyro[2],
 				rollRateDesired, pitchRateDesired, yawRateDesired);
+  
+  controllerCorrectSpeedPID((float)moveSpeed,speedDesired);
+#ifdef ABROBOT
+  controllerGetActuatorOutput(&actuatorRoll, &actuatorPitch, &actuatorYaw, &actuatorSpeed);
+#else
 	controllerGetActuatorOutput(&actuatorRoll, &actuatorPitch, &actuatorYaw);
+#endif
 #ifdef DGB	
 	printf("actuatorThrust:%d",actuatorThrust);
 #endif
@@ -501,8 +526,8 @@ void stabilizer()
     distributePower(actuatorThrust, actuatorRoll, actuatorPitch, -actuatorYaw);
   else
     distributePower(0, 0, 0, 0);
-  //if((GetFrameCount()%18)==0)
-  //  printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);
+  if((GetFrameCount()%18)==0)
+    printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);
 #else
   if(GetFrameCount()>(MOTORS_ESC_DELAY*2)) {
     if (actuatorThrust > 0)

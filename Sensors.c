@@ -38,6 +38,7 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| {======|             *
 //#include "RC.h"
 #include "LED.h"
 #include "Report.h"
+#include "Hall.h"
 SensorInit_T SensorInitState = {false,false,false};
 SensorInit_T SensorCalState  = {false,false,false,false};
 CAL_FLASH_STATE_T CalFlashState =  {false,false,false,0xff};
@@ -427,7 +428,16 @@ bool SensorReadBARO()
 	return false;
 #endif
 }
-
+#ifdef ABROBOT
+void SensorReadSpeed()
+{
+#if STACK_HALL
+	int16_t moveSpeed;/* cm/sec */
+	HALL_getSpeed(&moveSpeed);
+  Sensor.moveSpeed = moveSpeed;
+#endif
+}
+#endif
 void SensorsRead(char SensorType, char interval)
 {
 #if STACK_BARO
@@ -462,6 +472,12 @@ void SensorsRead(char SensorType, char interval)
 		nvtInputSensorRawGYRO(&Sensor.rawGYRO[0]);
 	}
 #endif
+#if STACK_HALL
+	if(SensorType&SENSOR_HALL) {
+		SensorReadSpeed();
+	}
+#endif
+  
 }
 
 void SensorsDynamicCalibrate(char SensorType)
@@ -545,5 +561,11 @@ void SetBaroAltitude(float alt)
 BaroInfo_T* GetBaroInfo()
 {
 	return &Sensor.BaroInfo;
+}
+#endif
+#if STACK_HALL
+int16_t GetMoveSpeed()
+{
+	return Sensor.moveSpeed;
 }
 #endif

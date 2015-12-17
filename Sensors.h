@@ -33,7 +33,11 @@ typedef struct {
 #if STACK_BARO
 	BaroInfo_T BaroInfo;
 #endif
+
 	float Altitude;
+#if STACK_HALL
+  int16_t moveSpeed;
+#endif
 }Sensor_T;
 
 typedef struct {
@@ -109,5 +113,8 @@ int32_t GetBaroBasePressure(void);
 float GetBaroAltitude(void);
 void SetBaroAltitude(float alt);
 BaroInfo_T* GetBaroInfo(void);
+#endif
+#if STACK_HALL
+int16_t GetMoveSpeed(void);
 #endif
 #endif

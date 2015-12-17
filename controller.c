@@ -46,10 +46,17 @@ PidObject pidRoll;
 PidObject pidPitch;
 PidObject pidYaw;
 PidObject pidAltHold; // Used for altitute hold mode. I gets reset when the bat status changes
+#ifdef ABROBOT
+PidObject pidSpeed;
+#endif
 
 int16_t rollOutput;
 int16_t pitchOutput;
 int16_t yawOutput;
+#ifdef ABROBOT
+int16_t speedOutput;
+#endif
+
 
 static bool isInit;
 
@@ -66,7 +73,11 @@ bool LoadFlashPID()
 		pidInit(&pidRollRate, 0, PID_FIELD[9], PID_FIELD[10], PID_FIELD[11], IMU_UPDATE_DT);
 		pidInit(&pidPitchRate, 0, PID_FIELD[12], PID_FIELD[13], PID_FIELD[14], IMU_UPDATE_DT);
 		pidInit(&pidYawRate, 0, PID_FIELD[15], PID_FIELD[16], PID_FIELD[17], IMU_UPDATE_DT);
+#ifdef ABROBOT
+    pidInit(&pidSpeed, 0, PID_FIELD[18], PID_FIELD[19], PID_FIELD[20], IMU_UPDATE_DT);
+#else
 		pidInit(&pidAltHold, 0, PID_FIELD[18], PID_FIELD[19], PID_FIELD[20], ALTHOLD_UPDATE_DT);
+#endif
 		return true;
 	}
 	else {
@@ -76,7 +87,11 @@ bool LoadFlashPID()
 		pidInit(&pidRollRate, 0, PID_ROLL_RATE_KP, PID_ROLL_RATE_KI, PID_ROLL_RATE_KD, IMU_UPDATE_DT);
 		pidInit(&pidPitchRate, 0, PID_PITCH_RATE_KP, PID_PITCH_RATE_KI, PID_PITCH_RATE_KD, IMU_UPDATE_DT);
 		pidInit(&pidYawRate, 0, PID_YAW_RATE_KP, PID_YAW_RATE_KI, PID_YAW_RATE_KD, IMU_UPDATE_DT);
+#ifdef ABROBOT
+    pidInit(&pidSpeed, 0, PID_SPEED_KP, PID_SPEED_KI, PID_SPEED_KD, IMU_UPDATE_DT);
+#else
 		pidInit(&pidAltHold, 0, PID_ALTHOLD_KP, PID_ALTHOLD_KI, PID_ALTHOLD_KD, ALTHOLD_UPDATE_DT);
+#endif
 		return false;
 	}
 }
@@ -179,7 +194,18 @@ void controllerCorrectAttitudePID(
 	pidSetDt(&pidYaw,getUpdateDT());
 	*yawRateDesired = pidUpdate(&pidYaw, eulerYawActual, FALSE);
 }
-
+#ifdef ABROBOT
+void controllerCorrectSpeedPID(
+				float speedActual,
+				float speedDesired)
+{ 
+  float pidOut;
+	pidSetDesired(&pidSpeed, speedDesired);
+	pidSetDt(&pidSpeed,getUpdateDT());
+	pidOut = pidUpdate(&pidSpeed, speedActual, TRUE);
+	TRUNCATE_SINT16(speedOutput, pidOut);
+}
+#endif
 void controllerResetAllPID(void)
 {
 	pidReset(&pidRoll);
@@ -188,6 +214,9 @@ void controllerResetAllPID(void)
 	pidReset(&pidRollRate);
 	pidReset(&pidPitchRate);
 	pidReset(&pidYawRate);
+#ifdef ABROBOT
+  pidReset(&pidSpeed);
+#endif
 }
 
 void controllerSetRollPID(float kp, float ki, float kd)
@@ -254,12 +283,33 @@ void controllerSetAltHoldPID(float kp, float ki, float kd)
 	if(kd>=0)
 		pidSetPID(&pidAltHold, pidAltHold.kp, pidAltHold.ki, kd);
 }
+#ifdef ABROBOT
+void controllerSetSpeedPID(float kp, float ki, float kd)
+{
+	if(kp>=0)
+		pidSetPID(&pidSpeed, kp, pidSpeed.ki, pidSpeed.kd);
+	if(ki>=0)
+		pidSetPID(&pidSpeed, pidSpeed.kp, ki, pidSpeed.kd);
+	if(kd>=0)
+		pidSetPID(&pidSpeed, pidSpeed.kp, pidSpeed.ki, kd);
+}
+#endif
+#ifdef ABROBOT
+void controllerGetActuatorOutput(int16_t* roll, int16_t* pitch, int16_t* yaw,int16_t* speed)
+{
+	*roll = rollOutput;
+	*pitch = pitchOutput;
+	*yaw = yawOutput;
+  *speed = speedOutput;
+}
+#else
 void controllerGetActuatorOutput(int16_t* roll, int16_t* pitch, int16_t* yaw)
 {
 	*roll = rollOutput;
 	*pitch = pitchOutput;
 	*yaw = yawOutput;
 }
+#endif
 void GetRollPID(float* PID)
 {
 	PID[0] = pidRoll.kp;
@@ -302,6 +352,14 @@ void GetAltHoldPID(float* PID)
 	PID[1] = pidAltHold.ki;
 	PID[2] = pidAltHold.kd;
 }
+#ifdef ABROBOT
+void GetSpeedPID(float* PID)
+{
+	PID[0] = pidSpeed.kp;
+	PID[1] = pidSpeed.ki;
+	PID[2] = pidSpeed.kd;
+}
+#endif
 int GetPIDValue()
 {
 	char value_s[3];
@@ -327,6 +385,12 @@ PidObject* GetAltHoldPIDObj()
 {
 	return &pidAltHold;
 }
+#ifdef ABROBOT
+PidObject* GetSpeedPIDObj()
+{
+	return &pidSpeed;
+}
+#endif
 void SetPID()
 {
 	char type = GetChar();
@@ -399,6 +463,18 @@ void SetPID()
 				controllerSetYawRatePID(-1, -1, (float)valuef);
 		}
 	}
+#ifdef ABROBOT
+  else if(type=='a') { //Altitide Hold PID
+		pid = GetChar();
+		valuef = GetPIDfloat();
+		if(pid=='p') 
+			controllerSetSpeedPID((float)valuef, -1, -1);
+		else if(pid=='i') 
+			controllerSetSpeedPID(-1, (float)valuef, -1);
+		else if(pid=='d') 
+			controllerSetSpeedPID(-1, -1, (float)valuef);
+	}
+#else
 	else if(type=='a') { //Altitide Hold PID
 		pid = GetChar();
 		valuef = GetPIDfloat();
@@ -409,6 +485,7 @@ void SetPID()
 		else if(pid=='d') 
 			controllerSetAltHoldPID(-1, -1, (float)valuef);
 	}
+#endif
 	else if(type=='s') { //'s'tore flash PID
 		UpdateFlashPID(false);
 	}

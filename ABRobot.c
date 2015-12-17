@@ -250,6 +250,9 @@ void loop()
   GPSCommandProcess();
 #endif
 	SensorsRead(SENSOR_ACC|SENSOR_GYRO|SENSOR_MAG|SENSOR_BARO,1);
+#ifdef ABROBOT
+ SensorsRead(SENSOR_HALL,1);
+#endif
 #ifdef OPTION_RC
 	if(IsSSVConnected()) {
 	ssv_rc_update();

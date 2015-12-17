@@ -536,6 +536,11 @@
               <FileType>1</FileType>
               <FilePath>.\gps.c</FilePath>
             </File>
+            <File>
+              <FileName>Hall.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hall.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -755,6 +760,11 @@
               <FileName>gps.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\gps.h</FilePath>
+            </File>
+            <File>
+              <FileName>Hall.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hall.h</FilePath>
             </File>
           </Files>
         </Group>

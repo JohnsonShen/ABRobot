@@ -58,6 +58,13 @@
 
 #define RC_ALT_DEAD_BAND 100
 #define RC_YAW_DEAD_BAND 50
+#ifdef ABROBOT
+#define RC_ROLL_DEAD_BAND 10
+#define RC_PITCH_DEAD_BAND 10
+#else
+#define RC_ROLL_DEAD_BAND 0
+#define RC_PITCH_DEAD_BAND 0
+#endif
 
 #define ROLL_CH          0
 #define PITCH_CH         1

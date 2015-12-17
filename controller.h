@@ -41,9 +41,15 @@ void controllerCorrectRatePID(
 				float rollRateActual, float pitchRateActual, float yawRateActual,
 				float rollRateDesired, float pitchRateDesired, float yawRateDesired);
 
+#ifdef ABROBOT
+void controllerCorrectSpeedPID(float speedActual,float speedDesired);
+#endif
 void controllerResetAllPID(void);
-
+#ifdef ABROBOT
+void controllerGetActuatorOutput(int16_t* roll, int16_t* pitch, int16_t* yaw, int16_t* speed);
+#else
 void controllerGetActuatorOutput(int16_t* roll, int16_t* pitch, int16_t* yaw);
+#endif
 
 void controllerSetRollPID(float kp, float ki, float kd);
 

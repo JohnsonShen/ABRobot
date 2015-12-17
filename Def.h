@@ -155,6 +155,11 @@
 #else
 #define STACK_BARO 0
 #endif
+#if defined(ABROBOT)
+#define STACK_HALL 1
+#else
+#define STACK_HALL 0
+#endif
 #if defined(OPTION_RC)
 #define OUTPUT_RC_INTERVAL 20 //milliseconds,50Hz
 #define RC_CHANS 6
