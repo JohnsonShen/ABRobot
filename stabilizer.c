@@ -526,8 +526,8 @@ void stabilizer()
     distributePower(actuatorThrust, actuatorRoll, actuatorPitch, -actuatorYaw);
   else
     distributePower(0, 0, 0, 0);
-  if((GetFrameCount()%18)==0)
-    printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);
+  /*if((GetFrameCount()%18)==0)
+    printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);*/
 #else
   if(GetFrameCount()>(MOTORS_ESC_DELAY*2)) {
     if (actuatorThrust > 0)
