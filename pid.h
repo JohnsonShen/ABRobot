@@ -125,7 +125,6 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| {======|             *
 #define PID_PITCH_KD  LEVEL_KD_1806
 #endif
 #define PID_PITCH_INTEGRATION_LIMIT   20.0
-
 #define PID_YAW_KP  0.0
 #define PID_YAW_KI  0.0
 #define PID_YAW_KD  0.0

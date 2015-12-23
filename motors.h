@@ -28,6 +28,8 @@
 #define IO_MR_CRTL1        PE,BIT13
 #define IO_ML_CRTL0        PD,BIT7
 #define IO_ML_CRTL1        PF,BIT2
+#define IO_MC_CRTL0        PD,BIT7
+#define IO_MC_CRTL1        PF,BIT2
 #endif
 // Motors IDs define
 #define MOTOR_M1  0

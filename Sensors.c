@@ -432,9 +432,10 @@ bool SensorReadBARO()
 void SensorReadSpeed()
 {
 #if STACK_HALL
-	int16_t moveSpeed;/* cm/sec */
-	HALL_getSpeed(&moveSpeed);
-  Sensor.moveSpeed = moveSpeed;
+	int16_t moveSpeed[2];/* cm/sec */
+	HALL_getSpeed(moveSpeed);
+  Sensor.moveSpeed[0] = moveSpeed[0];
+  Sensor.moveSpeed[1] = moveSpeed[1];
 #endif
 }
 #endif
@@ -564,7 +565,7 @@ BaroInfo_T* GetBaroInfo()
 }
 #endif
 #if STACK_HALL
-int16_t GetMoveSpeed()
+int16_t* GetMoveSpeed()
 {
 	return Sensor.moveSpeed;
 }

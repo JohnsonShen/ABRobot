@@ -136,10 +136,16 @@ void commanderGetRPY()
 	rc_aux2 = rcData[AUX2_CH];
   
 #ifdef ABROBOT
-  //rc_pitch = -rc_pitch;
-  rc_roll = -rc_roll;
-#endif
-	
+  //rc_roll = -rc_roll;
+  rc_yaw = rc_roll;
+  rc_roll =0;
+  if(!magMode)
+			HoldHead();
+		
+		magMode = true;
+		headFreeMode = false;
+#else
+
 	if(rc_aux2<RC_ONE_THIRD) {
 		magMode = false;
 		headFreeMode = false;
@@ -155,7 +161,7 @@ void commanderGetRPY()
 		magMode = true;
 		headFreeMode = false;
 	}
-	
+#endif
 	if(headFreeMode) { //to optimize
 		float radDiff = (headFreeHold - eulerYawActual) * 0.0174533f; // where PI/180 ~= 0.0174533
 		float cosDiff = cos(radDiff);
@@ -266,14 +272,14 @@ uint16_t limitThrust(int32_t value)
 
 	return (uint16_t)value;
 }
-
-static void distributePower(int16_t thrust, int16_t roll,
-                            int16_t pitch, int16_t yaw)
-{
 #ifdef ABROBOT
+static void distributePower(int16_t thrust, int16_t roll,
+                            int16_t pitch, int16_t yaw, int16_t speed)
+{
+
   int16_t actuator[2];
-  actuator[R] = thrust - pitch + roll;
-  actuator[L] = -thrust + pitch + roll;
+  actuator[R] = thrust + speed - pitch + roll - yaw;
+  actuator[L] = -thrust -speed + pitch + roll - yaw;
   /* ROBOT tilt forward
      Right Motor CCW for balance
   */
@@ -360,7 +366,11 @@ static void distributePower(int16_t thrust, int16_t roll,
     
   motorsSetRatio(MOTOR_M1, BLDC_MOTOR[R].pwm);
 	motorsSetRatio(MOTOR_M2, BLDC_MOTOR[L].pwm);
+}
 #else
+static void distributePower(int16_t thrust, int16_t roll,
+                            int16_t pitch, int16_t yaw)
+{
 #ifdef HEX6X 
 	motorPowerM[0] = limitThrust(thrust - COS_60*roll - COS_30*pitch + yaw);//PIDMIX(-1/2,-7/8,+1); //FRONT_R
 	motorPowerM[1] = limitThrust(thrust - roll - yaw);//PIDMIX(-1  ,+0  ,-1); //RIGHT
@@ -400,9 +410,8 @@ static void distributePower(int16_t thrust, int16_t roll,
 	motorsSetRatio(MOTOR_M5, motorPowerM[4]);
 	motorsSetRatio(MOTOR_M6, motorPowerM[5]);
 #endif
-#endif
 }
-
+#endif
 void GetMotorPower(int16_t* MotorPower)
 {
 	MotorPower[0] = (uint16_t)motorPowerM[0];
@@ -458,9 +467,12 @@ void stabilizer()
 	float Euler[3],Ve[3];
 #ifdef ABROBOT
 #ifdef STACK_HALL
-  int16_t moveSpeed;/*cm/sec*/
+  int16_t* moveSpeed;/*cm/sec*/
+  int16_t moveSpeedAvg;/*cm/sec*/
 #endif
   moveSpeed = GetMoveSpeed();
+  moveSpeedAvg = (moveSpeed[0] + moveSpeed[1])/2;
+  moveSpeedAvg = 0;
 #endif
 #if STACK_BARO	
 	bool altHold =  GetAltHoldMode();
@@ -468,13 +480,13 @@ void stabilizer()
 	nvtGetEulerRPY(Euler);
 #ifdef ABROBOT
   eulerRollActual = 0;
-  eulerYawActual = 0;
+  eulerYawActual = Euler[2];
+  //eulerYawActual = 0;
 #else
 	eulerRollActual = Euler[0];
   eulerYawActual = Euler[2];
 #endif
 	eulerPitchActual = Euler[1];
-	eulerYawActual = Euler[2];
 
 	DetectFlip();
 	
@@ -512,22 +524,22 @@ void stabilizer()
 	controllerCorrectRatePID(gyro[0], gyro[1], gyro[2],
 				rollRateDesired, pitchRateDesired, yawRateDesired);
   
-  controllerCorrectSpeedPID((float)moveSpeed,speedDesired);
+  controllerCorrectSpeedPID((float)moveSpeedAvg,speedDesired);
 #ifdef ABROBOT
   controllerGetActuatorOutput(&actuatorRoll, &actuatorPitch, &actuatorYaw, &actuatorSpeed);
 #else
 	controllerGetActuatorOutput(&actuatorRoll, &actuatorPitch, &actuatorYaw);
 #endif
-#ifdef DGB	
-	printf("actuatorThrust:%d",actuatorThrust);
-#endif
+
+	//printf("actuatorThrust:%d",actuatorThrust);
+
 #ifdef ABROBOT
   if((GetSensorCalState()&(1<<GYRO))) 
-    distributePower(actuatorThrust, actuatorRoll, actuatorPitch, -actuatorYaw);
+    distributePower(actuatorThrust, actuatorRoll, actuatorPitch, -actuatorYaw, actuatorSpeed);
   else
-    distributePower(0, 0, 0, 0);
-  /*if((GetFrameCount()%18)==0)
-    printf("Th,Roll,Pitch,Yaw:%d,%d,%d,%d  \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw);*/
+    distributePower(0, 0, 0, 0, 0);
+  //if((GetFrameCount()%18)==0)
+  //  printf("Th,Roll,Pitch,Yaw, Speed:%d,%d,%d,%d, %d \n",actuatorThrust,actuatorRoll, actuatorPitch, -actuatorYaw, actuatorSpeed);
 #else
   if(GetFrameCount()>(MOTORS_ESC_DELAY*2)) {
     if (actuatorThrust > 0)
